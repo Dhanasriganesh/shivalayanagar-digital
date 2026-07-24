@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-sans: "Figtree", system-ui, sans-serif;
+
+  --color-ink: #14231f;
+  --color-muted: #5c6f68;
+  --color-mist: #e8f0ec;
+  --color-paper: #f7faf8;
+  --color-teal: #0f5c54;
+  --color-teal-deep: #0a3d38;
+  --color-leaf: #2a8f6f;
+  --color-coral: #e4572e;
+  --color-amber: #f0a202;
+  --color-line: #d2ddd7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background:
+    radial-gradient(120% 80% at 10% -10%, #c8e6dc 0%, transparent 55%),
+    radial-gradient(90% 60% at 100% 0%, #dce8e2 0%, transparent 45%),
+    linear-gradient(180deg, var(--color-paper) 0%, var(--color-mist) 100%);
+  background-attachment: fixed;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes soft-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.animate-rise {
+  animation: rise-in 0.55s ease-out both;
+}
+
+.animate-rise-delay {
+  animation: rise-in 0.65s ease-out 0.12s both;
+}
+
+.animate-rise-late {
+  animation: rise-in 0.7s ease-out 0.22s both;
+}
+
+.pulse-dot {
+  animation: soft-pulse 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-rise-delay,
+  .animate-rise-late,
+  .pulse-dot {
+    animation: none;
+  }
+}
+
+/* Print styles for QR sheets */
+@media print {
+  body {
+    background: white !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .qr-print-grid {
+    break-inside: avoid;
+  }
+}

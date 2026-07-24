@@ -1,0 +1,125 @@
+rules_version = '2';
+
+/**
+ * Shivalaya Nagar · Street Watch — Cloud Firestore rules
+ *
+ * Collection: problems
+ * Fields on create:
+ *   streetId (1–11), streetName, heading, description,
+ *   imageBase64 (data:image/...;base64,...), status ("open"), createdAt
+ *
+ * Publish: Firebase Console → Firestore Database → Rules → Publish
+ */
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isWholeNumber(value) {
+      return (value is int || value is float)
+        && value == math.floor(value);
+    }
+
+    function isStreetId(value) {
+      return isWholeNumber(value)
+        && value >= 1
+        && value <= 11;
+    }
+
+    function isNonEmptyString(value, maxLen) {
+      return value is string
+        && value.size() > 0
+        && value.size() <= maxLen;
+    }
+
+    function isOptionalDescription(value) {
+      return value is string
+        && value.size() <= 600;
+    }
+
+    function isValidStatus(value) {
+      return value in ['open', 'resolved'];
+    }
+
+    /**
+     * Base64 image as a data URL (what the app stores).
+     * Example: data:image/jpeg;base64,/9j/4AAQSkZJRg...
+     *
+     * - Min size: real photo payload
+     * - Max size: 900000 chars (~leave headroom under 1 MiB doc limit)
+     * - Header checked via split (no regex on the huge base64 body)
+     * - App currently writes JPEG; PNG/WebP also allowed
+     */
+    function isValidBase64ImageUrl(value) {
+      let parts = value.split(',');
+      return value is string
+        && value.size() >= 64
+        && value.size() <= 900000
+        && parts.size() == 2
+        && parts[0] in [
+          'data:image/jpeg;base64',
+          'data:image/jpg;base64',
+          'data:image/png;base64',
+          'data:image/webp;base64'
+        ]
+        && parts[1].size() >= 32;
+    }
+
+    function hasExactCreateKeys() {
+      return request.resource.data.keys().hasAll([
+          'streetId',
+          'streetName',
+          'heading',
+          'description',
+          'imageBase64',
+          'status',
+          'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'streetId',
+          'streetName',
+          'heading',
+          'description',
+          'imageBase64',
+          'status',
+          'createdAt'
+        ]);
+    }
+
+    function isValidCreate() {
+      let d = request.resource.data;
+      return hasExactCreateKeys()
+        && isStreetId(d.streetId)
+        && isNonEmptyString(d.streetName, 80)
+        && isNonEmptyString(d.heading, 120)
+        && isOptionalDescription(d.description)
+        && isValidBase64ImageUrl(d.imageBase64)
+        && d.status == 'open'
+        // serverTimestamp() is represented as request.time in rules
+        && d.createdAt == request.time;
+    }
+
+    /** /admin-san may only change status — image & text stay immutable */
+    function isValidStatusUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && isValidStatus(request.resource.data.status);
+    }
+
+    match /problems/{problemId} {
+      // Anyone can view reports (public street pages + admin)
+      allow get, list: if true;
+
+      // QR / street form submissions
+      allow create: if isValidCreate();
+
+      // Admin: mark resolved / reopen
+      allow update: if isValidStatusUpdate();
+
+      // Admin: delete report (no Auth yet — add later if needed)
+      allow delete: if true;
+    }
+
+    // Block any other collection / path
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
