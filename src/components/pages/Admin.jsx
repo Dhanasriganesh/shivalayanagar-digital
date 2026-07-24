@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import { STREETS, streetPath } from '../../data/streets'
+import { APP_URL, STREETS, streetUrl } from '../../data/streets'
 import {
   deleteProblem,
   fetchAllProblems,
@@ -15,8 +15,6 @@ function Admin() {
   const [activeStreet, setActiveStreet] = useState('all')
   const [panel, setPanel] = useState('reports') // reports | qr
   const [busyId, setBusyId] = useState('')
-
-  const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -249,9 +247,10 @@ function Admin() {
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 no-print">
             <p className="text-sm text-muted">
-              Print these and stick one QR per street. Links stay permanent as{' '}
-              <code className="rounded bg-mist px-1.5 py-0.5 text-xs">/street-1</code> …{' '}
-              <code className="rounded bg-mist px-1.5 py-0.5 text-xs">/street-11</code>.
+              Print these and stick one QR per street. Each QR opens the live site, e.g.{' '}
+              <code className="break-all rounded bg-mist px-1.5 py-0.5 text-[10px]">
+                {APP_URL}/street-4
+              </code>
             </p>
             <button
               type="button"
@@ -264,7 +263,7 @@ function Admin() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {STREETS.map((street) => {
-              const url = `${origin}${streetPath(street.id)}`
+              const url = streetUrl(street.id)
               return (
                 <div
                   key={street.id}

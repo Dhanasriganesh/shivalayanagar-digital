@@ -22,7 +22,17 @@ export function getStreetBySlug(slug) {
   return STREETS.find((s) => s.slug === slug) ?? null
 }
 
+/** Permanent public site used inside printed QR codes */
+export const APP_URL = (
+  import.meta.env.VITE_APP_URL || 'https://shivalayanagar-digital.vercel.app'
+).replace(/\/$/, '')
+
 /** Permanent QR path for a street (relative) — /street-4 style */
 export function streetPath(streetId) {
   return `/street-${streetId}`
+}
+
+/** Full permanent URL encoded in each street QR */
+export function streetUrl(streetId) {
+  return `${APP_URL}${streetPath(streetId)}`
 }
