@@ -1,19 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
-  --font-sans: "Figtree", system-ui, sans-serif;
+  --font-display: "Noto Sans", "Noto Sans Telugu", system-ui, sans-serif;
+  --font-sans: "Noto Sans", "Noto Sans Telugu", system-ui, sans-serif;
 
-  --color-ink: #14231f;
-  --color-muted: #5c6f68;
-  --color-mist: #e8f0ec;
-  --color-paper: #f7faf8;
-  --color-teal: #0f5c54;
-  --color-teal-deep: #0a3d38;
-  --color-leaf: #2a8f6f;
-  --color-coral: #e4572e;
-  --color-amber: #f0a202;
-  --color-line: #d2ddd7;
+  --color-ink: #122033;
+  --color-muted: #5b6b7c;
+  --color-mist: #e8eef2;
+  --color-paper: #f3f6f4;
+  --color-teal: #0b6b56;
+  --color-teal-deep: #084c3d;
+  --color-leaf: #1f8a66;
+  --color-coral: #c0392b;
+  --color-amber: #d97706;
+  --color-line: #d5dee6;
+  --color-saffron: #ff671f;
+  --color-india-green: #046a38;
+  --color-navy: #0b2545;
+  --color-gov-red: #b42318;
 }
 
 * {
@@ -31,9 +35,9 @@ body {
   font-family: var(--font-sans);
   color: var(--color-ink);
   background:
-    radial-gradient(120% 80% at 10% -10%, #c8e6dc 0%, transparent 55%),
-    radial-gradient(90% 60% at 100% 0%, #dce8e2 0%, transparent 45%),
-    linear-gradient(180deg, var(--color-paper) 0%, var(--color-mist) 100%);
+    radial-gradient(120% 70% at 0% 0%, #d7ece4 0%, transparent 52%),
+    radial-gradient(90% 50% at 100% 0%, #f8e6dc 0%, transparent 46%),
+    linear-gradient(180deg, #f7faf8 0%, #eef3f0 100%);
   background-attachment: fixed;
 }
 
@@ -53,10 +57,46 @@ select {
   font: inherit;
 }
 
+.tricolor {
+  background: linear-gradient(
+    90deg,
+    #ff671f 0 33.33%,
+    #ffffff 33.33% 66.66%,
+    #046a38 66.66% 100%
+  );
+}
+
+.page-grievances {
+  background:
+    radial-gradient(110% 60% at 50% -10%, #f8d5cc 0%, transparent 55%),
+    linear-gradient(180deg, #fbeae6 0%, #f7f4f2 38%, transparent 70%);
+}
+
+.page-status {
+  background:
+    radial-gradient(100% 50% at 80% 0%, #f6d4c8 0%, transparent 50%),
+    linear-gradient(180deg, #fde8df 0%, transparent 42%);
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker 22s linear infinite;
+}
+
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -64,42 +104,31 @@ select {
   }
 }
 
-@keyframes soft-pulse {
-  0%,
-  100% {
-    opacity: 0.45;
-  }
-  50% {
-    opacity: 0.85;
-  }
-}
-
 .animate-rise {
-  animation: rise-in 0.55s ease-out both;
+  animation: rise-in 0.5s ease-out both;
 }
 
 .animate-rise-delay {
-  animation: rise-in 0.65s ease-out 0.12s both;
+  animation: rise-in 0.6s ease-out 0.1s both;
 }
 
 .animate-rise-late {
-  animation: rise-in 0.7s ease-out 0.22s both;
-}
-
-.pulse-dot {
-  animation: soft-pulse 2.4s ease-in-out infinite;
+  animation: rise-in 0.65s ease-out 0.18s both;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-rise,
   .animate-rise-delay,
   .animate-rise-late,
-  .pulse-dot {
+  .ticker-track {
     animation: none;
   }
 }
 
-/* Print styles for QR sheets */
+.shadow-card {
+  box-shadow: 0 10px 28px -18px rgba(12, 32, 48, 0.45);
+}
+
 @media print {
   body {
     background: white !important;
@@ -113,7 +142,8 @@ select {
     display: block !important;
   }
 
-  .qr-print-grid {
+  .qr-print-grid,
+  .ack-print {
     break-inside: avoid;
   }
 }

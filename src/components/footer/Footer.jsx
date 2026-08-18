@@ -1,13 +1,24 @@
+import { Emblem } from '../ui/Emblem'
+import { useT } from '../../context/useT'
+
 function Footer() {
+  const { t } = useT()
+
   return (
-    <footer className="mt-auto border-t border-line/70 bg-white/50 no-print">
-      <div className="mx-auto max-w-3xl px-4 py-5 text-center sm:px-5">
-        <p className="font-display text-sm font-semibold text-teal-deep">
-          Shivalaya Nagar · Street Watch
+    <footer className="mt-auto no-print">
+      <div className="mx-auto max-w-lg px-4 pb-6 pt-2 text-center sm:px-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+          {t.footerCredit}
         </p>
-        <p className="mt-1 text-xs text-muted">
-          Scan a street QR or pick a street to report local issues.
-        </p>
+        <div className="mt-2 inline-flex items-center gap-2 rounded-xl border border-line bg-white px-3 py-2 shadow-card">
+          <Emblem size={28} />
+          <span className="text-left">
+            <span className="block text-[12px] font-extrabold leading-tight text-teal-deep">
+              {t.footerOrg}
+            </span>
+            <span className="block text-[10px] font-medium text-muted">{t.footerOrgSub}</span>
+          </span>
+        </div>
       </div>
     </footer>
   )

@@ -10,6 +10,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 /** Client routes that must work on hard refresh / QR open */
 const SPA_ROUTES = [
   'admin-san',
+  'grievances',
+  'raise',
+  'status',
+  'ack',
   ...Array.from({ length: 11 }, (_, i) => `street-${i + 1}`),
   ...Array.from({ length: 11 }, (_, i) => `street/${i + 1}`),
 ]

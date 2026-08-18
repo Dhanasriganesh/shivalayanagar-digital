@@ -1,13 +1,9 @@
 rules_version = '2';
 
 /**
- * Shivalaya Nagar · Street Watch — Cloud Firestore rules
+ * Shivalaya Nagar Civic Grievance Portal — Cloud Firestore rules
  *
  * Collection: problems
- * Fields on create:
- *   streetId (1–11), streetName, heading, description,
- *   imageBase64 (data:image/...;base64,...), status ("open"), createdAt
- *
  * Publish: Firebase Console → Firestore Database → Rules → Publish
  */
 service cloud.firestore {
@@ -30,24 +26,43 @@ service cloud.firestore {
         && value.size() <= maxLen;
     }
 
+    function isOptionalString(value, maxLen) {
+      return value is string
+        && value.size() <= maxLen;
+    }
+
     function isOptionalDescription(value) {
       return value is string
         && value.size() <= 600;
     }
 
     function isValidStatus(value) {
-      return value in ['open', 'resolved'];
+      return value in [
+        'open',
+        'submitted',
+        'pending',
+        'in_progress',
+        'completed',
+        'closed',
+        'resolved'
+      ];
     }
 
-    /**
-     * Base64 image as a data URL (what the app stores).
-     * Example: data:image/jpeg;base64,/9j/4AAQSkZJRg...
-     *
-     * - Min size: real photo payload
-     * - Max size: 900000 chars (~leave headroom under 1 MiB doc limit)
-     * - Header checked via split (no regex on the huge base64 body)
-     * - App currently writes JPEG; PNG/WebP also allowed
-     */
+    function isValidCategoryPair(cat, sub) {
+      return (
+          cat == 'Drainage'
+          && sub in ['Drainage Leakage', 'Manhole Cover Repair', 'No Manhole Cover']
+        )
+        || (
+          cat == 'Electrical'
+          && sub in ['No Street Light', 'Non Glowing of Street Light', 'Current Pole Wire Issue']
+        )
+        || (
+          cat == 'Road'
+          && sub in ['Potholes']
+        );
+    }
+
     function isValidBase64ImageUrl(value) {
       let parts = value.split(',');
       return value is string
@@ -63,7 +78,7 @@ service cloud.firestore {
         && parts[1].size() >= 32;
     }
 
-    function hasExactCreateKeys() {
+    function hasLegacyCreateKeys() {
       return request.resource.data.keys().hasAll([
           'streetId',
           'streetName',
@@ -84,40 +99,99 @@ service cloud.firestore {
         ]);
     }
 
-    function isValidCreate() {
+    function isValidLegacyCreate() {
       let d = request.resource.data;
-      return hasExactCreateKeys()
+      return hasLegacyCreateKeys()
         && isStreetId(d.streetId)
         && isNonEmptyString(d.streetName, 80)
         && isNonEmptyString(d.heading, 120)
         && isOptionalDescription(d.description)
         && isValidBase64ImageUrl(d.imageBase64)
         && d.status == 'open'
-        // serverTimestamp() is represented as request.time in rules
         && d.createdAt == request.time;
     }
 
-    /** /admin-san may only change status — image & text stay immutable */
+    function hasNewCreateKeys() {
+      return request.resource.data.keys().hasAll([
+          'streetId',
+          'streetName',
+          'category',
+          'subcategory',
+          'heading',
+          'description',
+          'landmark',
+          'imageBase64',
+          'status',
+          'createdAt',
+          'grievanceNo',
+          'citizenName',
+          'citizenPhone',
+          'assignedTo',
+          'assignedPhone'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'streetId',
+          'streetName',
+          'category',
+          'subcategory',
+          'heading',
+          'description',
+          'landmark',
+          'imageBase64',
+          'status',
+          'createdAt',
+          'grievanceNo',
+          'citizenName',
+          'citizenPhone',
+          'assignedTo',
+          'assignedPhone'
+        ]);
+    }
+
+    function isValidNewCreate() {
+      let d = request.resource.data;
+      return hasNewCreateKeys()
+        && isStreetId(d.streetId)
+        && isNonEmptyString(d.streetName, 80)
+        && isValidCategoryPair(d.category, d.subcategory)
+        && isNonEmptyString(d.heading, 120)
+        && isOptionalDescription(d.description)
+        && isOptionalString(d.landmark, 200)
+        && isValidBase64ImageUrl(d.imageBase64)
+        && d.status == 'submitted'
+        && d.createdAt == request.time
+        && isNonEmptyString(d.grievanceNo, 20)
+        && isOptionalString(d.citizenName, 80)
+        && isOptionalString(d.citizenPhone, 15)
+        && isNonEmptyString(d.assignedTo, 80)
+        && isNonEmptyString(d.assignedPhone, 15);
+    }
+
     function isValidStatusUpdate() {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
         && isValidStatus(request.resource.data.status);
     }
 
+    function isValidAdminUpdate() {
+      let affected = request.resource.data.diff(resource.data).affectedKeys();
+      return affected.hasOnly(['status', 'assignedTo', 'assignedPhone', 'officerRemarks', 'updatedAt'])
+        && isValidStatus(request.resource.data.status)
+        && (!affected.hasAny(['assignedTo']) || isOptionalString(request.resource.data.assignedTo, 80))
+        && (!affected.hasAny(['assignedPhone']) || isOptionalString(request.resource.data.assignedPhone, 15))
+        && (!affected.hasAny(['officerRemarks']) || isOptionalString(request.resource.data.officerRemarks, 500))
+        && (
+          !affected.hasAny(['updatedAt'])
+          || request.resource.data.updatedAt == request.time
+        );
+    }
+
     match /problems/{problemId} {
-      // Anyone can view reports (public street pages + admin)
       allow get, list: if true;
-
-      // QR / street form submissions
-      allow create: if isValidCreate();
-
-      // Admin: mark resolved / reopen
-      allow update: if isValidStatusUpdate();
-
-      // Admin: delete report (no Auth yet — add later if needed)
+      allow create: if isValidLegacyCreate() || isValidNewCreate();
+      allow update: if isValidStatusUpdate() || isValidAdminUpdate();
       allow delete: if true;
     }
 
-    // Block any other collection / path
     match /{document=**} {
       allow read, write: if false;
     }

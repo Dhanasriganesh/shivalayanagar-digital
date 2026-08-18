@@ -1,0 +1,141 @@
+Shivalaya Nagar — Civic Grievance Portal
+Complete Application Documentation
+
+1) Application Overview
+-----------------------
+Shivalaya Nagar Civic Grievance Portal is a mobile-first ward reporting system.
+Residents scan a street QR (or pick a street), lodge a grievance with a photo,
+and track status in a GHMC-style citizen flow.
+
+The application covers 11 streets and provides:
+- Citizen home, grievance desk, raise form, and status tracking
+- Fixed civic categories with matching sub-categories
+- Admin control room for assignment, remarks, SLA and QR printing
+- Cloud Firestore storage
+
+Primary goal:
+A real-world grievance redressal desk for drainage, electrical and road issues.
+
+
+2) Civic categories (fixed)
+---------------------------
+Drainage
+- Drainage Leakage
+- Manhole Cover Repair
+- No Manhole Cover
+SLA: 3 days
+
+Electrical
+- No Street Light
+- Non Glowing of Street Light
+- Current Pole Wire Issue
+SLA: 2 days
+
+Road
+- Potholes
+SLA: 7 days
+
+Delay = elapsed days minus SLA. Overdue items are highlighted in admin.
+
+
+3) Status workflow
+------------------
+submitted  →  pending  →  in_progress  →  completed  /  closed
+
+Citizen tracker steps:
+Open → Under Process → Attended by Officer → Closed By Citizen → Conditional Closed
+
+Legacy records:
+- open      is shown as submitted
+- resolved  is shown as completed
+
+
+4) Technology Stack
+-------------------
+Frontend: React 19, React Router DOM 7, Tailwind CSS 4, Vite 7
+Backend-as-a-Service: Firebase Cloud Firestore
+Other: qrcode.react
+
+
+5) Routing
+----------
+Public:
+- /                  Home / civic dashboard
+- /grievances        Grievance desk and counts
+- /raise             Raise grievance (optional ?street=1)
+- /status            Check status (search + status chips)
+- /status/:id        Grievance detail
+- /ack/:id           Acknowledgement receipt
+- /street/:streetId  Street desk by ID
+- /street-1 … /street-11  QR-friendly aliases
+
+Admin:
+- /admin-san         Control room (overview, grievances, QR)
+
+Optional PIN:
+- Set VITE_ADMIN_PIN to require an access code on /admin-san
+
+
+6) Data model (Firestore collection: problems)
+----------------------------------------------
+New filings:
+- streetId, streetName
+- category, subcategory, heading (copied from subcategory)
+- description, landmark
+- imageBase64
+- status ("submitted")
+- createdAt (server timestamp)
+- grievanceNo
+- citizenName, citizenPhone
+- assignedTo, assignedPhone
+
+Admin may later set:
+- status, assignedTo, assignedPhone, officerRemarks, updatedAt
+
+Legacy filings (heading + open/resolved) still display.
+
+
+7) Firestore rules
+------------------
+File: firestore.rules
+
+After deploying this app version, publish rules in
+Firebase Console → Firestore Database → Rules → Publish
+
+New complaints will fail with a permission error until the new rules are live.
+
+
+8) Admin control room
+---------------------
+Overview: totals, category/street load, SLA overdue list
+Grievances: search, street/category/status filters, photo, workflow buttons,
+            officer assignment, remarks, delete
+QR codes: printable street QR sheet
+
+
+9) Environment
+--------------
+See .env.example
+
+- Firebase keys
+- VITE_APP_URL  (printed inside QR codes — must be the live domain)
+- VITE_ADMIN_PIN (optional)
+
+
+10) Local development
+---------------------
+npm install
+npm run dev
+npm run build
+npm run preview
+npm run lint
+
+
+11) Deployment notes
+--------------------
+- vercel.json rewrites the SPA
+- vite.config.js copies index.html into key route folders for hard refresh / QR
+- Reprint QR sheets if VITE_APP_URL or street routes change
+
+
+End of documentation.

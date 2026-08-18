@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#084c3d"/>
+  <circle cx="32" cy="32" r="20" fill="none" stroke="#f4d58d" stroke-width="2"/>
+  <path d="M32 16l3.2 8.4H44l-7 5.2 2.7 8.4L32 33.6l-7.7 4.4 2.7-8.4-7-5.2h8.8z" fill="#f4d58d"/>
+  <text x="32" y="50" text-anchor="middle" font-size="8" font-family="Georgia, serif" fill="#fff">SN</text>
+</svg>
