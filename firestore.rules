@@ -156,7 +156,7 @@ service cloud.firestore {
         && isValidCategoryPair(d.category, d.subcategory)
         && isNonEmptyString(d.heading, 120)
         && isOptionalDescription(d.description)
-        && isOptionalString(d.landmark, 200)
+        && isNonEmptyString(d.landmark, 40)
         && isValidBase64ImageUrl(d.imageBase64)
         && d.status == 'submitted'
         && d.createdAt == request.time

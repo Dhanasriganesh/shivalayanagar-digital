@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { APP_URL, STREETS, streetUrl } from '../../data/streets'
-import { CATEGORIES, OFFICERS } from '../../data/categories'
+import { CATEGORIES } from '../../data/categories'
 import { STATUSES, getStatusMeta, normalizeStatus } from '../../data/status'
 import {
   deleteProblem,
@@ -92,7 +92,6 @@ function Admin() {
   const [queryText, setQueryText] = useState('')
   const [busyId, setBusyId] = useState('')
   const [openId, setOpenId] = useState('')
-  const [drafts, setDrafts] = useState({})
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -126,7 +125,7 @@ function Admin() {
       if (categoryFilter !== 'all' && displayCategory(p) !== categoryFilter) return false
       if (statusFilter !== 'all' && normalizeStatus(p.status) !== statusFilter) return false
       if (!q) return true
-      const hay = [p.grievanceNo, p.id, displayHeading(p), displayCategory(p), p.streetName, p.assignedTo]
+      const hay = [p.grievanceNo, p.id, displayHeading(p), displayCategory(p), p.streetName]
         .filter(Boolean)
         .join(' ')
         .toLowerCase()
@@ -152,42 +151,6 @@ function Admin() {
     }
     return map
   }, [problems])
-
-  function draftFor(problem) {
-    return (
-      drafts[problem.id] || {
-        status: normalizeStatus(problem.status),
-        assignedTo: problem.assignedTo || '',
-        assignedPhone: problem.assignedPhone || '',
-        officerRemarks: problem.officerRemarks || '',
-      }
-    )
-  }
-
-  function setDraft(id, patch) {
-    setDrafts((prev) => ({
-      ...prev,
-      [id]: { ...(prev[id] || {}), ...patch },
-    }))
-  }
-
-  async function saveAdmin(problem) {
-    const d = draftFor(problem)
-    setBusyId(problem.id)
-    try {
-      await updateProblemAdmin(problem.id, {
-        assignedTo: d.assignedTo,
-        assignedPhone: d.assignedPhone,
-        officerRemarks: d.officerRemarks,
-      })
-      await load()
-    } catch (err) {
-      console.error(err)
-      alert('Could not update. If this is a new field, publish the updated Firestore rules.')
-    } finally {
-      setBusyId('')
-    }
-  }
 
   async function quickStatus(problem, status) {
     setBusyId(problem.id)
@@ -434,21 +397,11 @@ function Admin() {
                   const sla = getSlaInfo(problem)
                   const status = getStatusMeta(problem.status)
                   const open = openId === problem.id
-                  const d = draftFor(problem)
-                  const officerPreset = OFFICERS[problem.category]
                   return (
                     <article key={problem.id} className="overflow-hidden rounded-2xl border border-line bg-white shadow-card">
                       <button
                         type="button"
-                        onClick={() => {
-                          setOpenId(open ? '' : problem.id)
-                          setDraft(problem.id, {
-                            status: normalizeStatus(problem.status),
-                            assignedTo: problem.assignedTo || officerPreset?.name || '',
-                            assignedPhone: problem.assignedPhone || officerPreset?.phone || '',
-                            officerRemarks: problem.officerRemarks || '',
-                          })
-                        }}
+                        onClick={() => setOpenId(open ? '' : problem.id)}
                         className="flex w-full items-start gap-3 px-4 py-3 text-left"
                       >
                         <span
@@ -498,7 +451,7 @@ function Admin() {
                           <dl className="grid gap-1 text-sm sm:grid-cols-2">
                             {problem.landmark ? (
                               <div>
-                                <dt className="text-xs text-muted">Landmark</dt>
+                                <dt className="text-xs text-muted">House no</dt>
                                 <dd className="font-medium">{problem.landmark}</dd>
                               </div>
                             ) : null}
@@ -548,44 +501,7 @@ function Admin() {
                             ))}
                           </div>
 
-                          <div className="grid gap-3 sm:grid-cols-2">
-                            <label className="space-y-1">
-                              <span className="text-[11px] font-bold uppercase text-muted">Assigned officer</span>
-                              <input
-                                value={d.assignedTo}
-                                onChange={(e) => setDraft(problem.id, { assignedTo: e.target.value })}
-                                className="w-full rounded-xl border border-line px-3 py-2 text-sm"
-                              />
-                            </label>
-                            <label className="space-y-1">
-                              <span className="text-[11px] font-bold uppercase text-muted">Officer mobile</span>
-                              <input
-                                value={d.assignedPhone}
-                                onChange={(e) => setDraft(problem.id, { assignedPhone: e.target.value })}
-                                className="w-full rounded-xl border border-line px-3 py-2 text-sm"
-                              />
-                            </label>
-                            <label className="space-y-1 sm:col-span-2">
-                              <span className="text-[11px] font-bold uppercase text-muted">Officer remarks</span>
-                              <textarea
-                                value={d.officerRemarks}
-                                onChange={(e) => setDraft(problem.id, { officerRemarks: e.target.value })}
-                                rows={2}
-                                maxLength={500}
-                                className="w-full rounded-xl border border-line px-3 py-2 text-sm"
-                              />
-                            </label>
-                          </div>
-
                           <div className="flex flex-wrap gap-2">
-                            <button
-                              type="button"
-                              disabled={busyId === problem.id}
-                              onClick={() => saveAdmin(problem)}
-                              className="rounded-xl bg-teal px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
-                            >
-                              Save assignment
-                            </button>
                             <button
                               type="button"
                               disabled={busyId === problem.id}

@@ -48,10 +48,12 @@ function Acknowledgement() {
               <dt className="text-muted">{t.street}</dt>
               <dd className="font-semibold">{problem.streetName}</dd>
             </div>
-            <div className="flex justify-between gap-3">
-              <dt className="text-muted">{t.assignedTo}</dt>
-              <dd className="font-semibold text-right">{problem.assignedTo}</dd>
-            </div>
+            {problem.landmark ? (
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted">{t.landmark}</dt>
+                <dd className="font-semibold">{problem.landmark}</dd>
+              </div>
+            ) : null}
             <div className="flex justify-between gap-3">
               <dt className="text-muted">{t.grievanceDate}</dt>
               <dd className="font-semibold">{formatGovDate(problem.createdAt)}</dd>

@@ -68,6 +68,10 @@ function GrievanceForm({ street: lockedStreet, onSubmitted }) {
       setError(lang === 'te' ? 'సమస్య ఫోటోను అప్‌లోడ్ చేయండి.' : 'Please upload a photo of the problem.')
       return
     }
+    if (!landmark.trim()) {
+      setError(lang === 'te' ? 'ఇంటి నంబర్ నమోదు చేయండి.' : 'Please enter your house number.')
+      return
+    }
     const phone = citizenPhone.replace(/\D/g, '')
     if (citizenPhone && phone.length !== 10) {
       setError(lang === 'te' ? '10 అంకెల మొబైల్ నంబర్ ఇవ్వండి.' : 'Enter a valid 10-digit mobile number.')
@@ -82,7 +86,7 @@ function GrievanceForm({ street: lockedStreet, onSubmitted }) {
         category,
         subcategory,
         description,
-        landmark,
+        landmark: landmark.trim(),
         imageBase64,
         citizenName,
         citizenPhone: phone,
@@ -210,15 +214,13 @@ function GrievanceForm({ street: lockedStreet, onSubmitted }) {
       ) : null}
 
       <label className="block space-y-1.5">
-        <span className="text-xs font-bold uppercase tracking-wide text-muted">
-          {t.landmark} <span className="normal-case tracking-normal font-medium">({t.optional})</span>
-        </span>
+        <span className="text-xs font-bold uppercase tracking-wide text-muted">{t.landmark} *</span>
         <input
           type="text"
           value={landmark}
           onChange={(e) => setLandmark(e.target.value)}
-          maxLength={200}
-          placeholder={lang === 'te' ? 'ఉదా. 12వ ఇంటి ఎదురుగా' : 'e.g. Opposite house no. 12'}
+          maxLength={40}
+          placeholder={lang === 'te' ? 'ఉదా. 12' : 'e.g. 12'}
           className="w-full rounded-xl border border-line bg-white px-3.5 py-3 text-base outline-none ring-teal/30 focus:ring-2"
         />
       </label>

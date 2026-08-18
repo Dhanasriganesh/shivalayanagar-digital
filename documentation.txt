@@ -10,7 +10,7 @@ and track status in a GHMC-style citizen flow.
 The application covers 11 streets and provides:
 - Citizen home, grievance desk, raise form, and status tracking
 - Fixed civic categories with matching sub-categories
-- Admin control room for assignment, remarks, SLA and QR printing
+- Admin control room for status, SLA and QR printing
 - Cloud Firestore storage
 
 Primary goal:
@@ -81,7 +81,7 @@ Optional PIN:
 New filings:
 - streetId, streetName
 - category, subcategory, heading (copied from subcategory)
-- description, landmark
+- description, house no (stored as landmark)
 - imageBase64
 - status ("submitted")
 - createdAt (server timestamp)
@@ -90,7 +90,7 @@ New filings:
 - assignedTo, assignedPhone
 
 Admin may later set:
-- status, assignedTo, assignedPhone, officerRemarks, updatedAt
+- status, updatedAt
 
 Legacy filings (heading + open/resolved) still display.
 
@@ -108,8 +108,7 @@ New complaints will fail with a permission error until the new rules are live.
 8) Admin control room
 ---------------------
 Overview: totals, category/street load, SLA overdue list
-Grievances: search, street/category/status filters, photo, workflow buttons,
-            officer assignment, remarks, delete
+Grievances: search, street/category/status filters, photo, workflow buttons, delete
 QR codes: printable street QR sheet
 
 

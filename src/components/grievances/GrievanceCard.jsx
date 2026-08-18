@@ -7,7 +7,7 @@ import {
   formatGovDate,
   getSlaInfo,
 } from '../../utils/grievance'
-import { CategoryGlyph, IconPhone, IconPlus } from '../ui/Icons'
+import { CategoryGlyph } from '../ui/Icons'
 import { ProgressStepper } from '../ui/ProgressStepper'
 import { useT } from '../../context/useT'
 
@@ -28,7 +28,6 @@ export function GrievanceCard({ problem, compact = false }) {
   const sla = getSlaInfo(problem)
   const category = displayCategory(problem)
   const catMeta = getCategory(problem.category)
-  const phone = String(problem.assignedPhone || '').replace(/\D/g, '')
 
   if (compact) {
     return (
@@ -94,17 +93,6 @@ export function GrievanceCard({ problem, compact = false }) {
         {problem.landmark ? <Field label={t.landmark}>{problem.landmark}</Field> : null}
         {problem.description ? <Field label={t.description}>{problem.description}</Field> : null}
         <Field label={t.grievanceDate}>{formatGovDate(problem.createdAt)}</Field>
-        <Field label={t.assignedTo}>
-          <span className="inline-flex items-center gap-1.5">
-            {problem.assignedTo || 'Ward Officer'}
-            {phone ? (
-              <a href={`tel:${phone}`} className="inline-flex text-india-green" aria-label="Call officer">
-                <IconPhone />
-              </a>
-            ) : null}
-          </span>
-        </Field>
-        <Field label={t.officerRemarks}>{problem.officerRemarks || '—'}</Field>
         <Field label={t.pendingDays}>{sla.pendingDays} Days</Field>
         <Field label={t.completedDays}>{sla.completedDays} Days</Field>
         <Field label={t.delayBy} danger={sla.delayBy > 0}>
@@ -118,28 +106,6 @@ export function GrievanceCard({ problem, compact = false }) {
         ) : null}
 
         <ProgressStepper status={normalizeStatus(problem.status)} />
-
-        <div className="flex gap-2 pt-3">
-          {phone ? (
-            <a
-              href={`tel:${phone}`}
-              className="inline-flex flex-1 items-center justify-center gap-1 rounded-xl border border-gov-red px-3 py-2.5 text-[13px] font-bold text-gov-red"
-            >
-              <IconPlus />
-              {t.messageOfficer}
-            </a>
-          ) : (
-            <span className="inline-flex flex-1 items-center justify-center gap-1 rounded-xl border border-line px-3 py-2.5 text-[13px] font-bold text-muted">
-              {t.messageOfficer}
-            </span>
-          )}
-          <Link
-            to={`/status/${problem.id}`}
-            className="inline-flex flex-1 items-center justify-center rounded-xl bg-teal px-3 py-2.5 text-[13px] font-bold text-white"
-          >
-            {t.viewMore}
-          </Link>
-        </div>
       </div>
     </article>
   )

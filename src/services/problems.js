@@ -36,7 +36,7 @@ export async function submitProblem({
     subcategory,
     heading: subcategory,
     description: (description || '').trim(),
-    landmark: (landmark || '').trim(),
+    landmark: String(landmark || '').trim(),
     imageBase64,
     status: 'submitted',
     createdAt: serverTimestamp(),
